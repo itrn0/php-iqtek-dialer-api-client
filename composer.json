@@ -1,0 +1,38 @@
+{
+  "authors": [
+    {
+      "name": "itrn0",
+      "email": "ilshat.mgn@gmail.com"
+    }
+  ],
+  "name": "itrn0/php-iqtek-dialer-api-client",
+  "description": "PHP client for IQTek Dialer API",
+  "require": {
+    "php": ">=7.4",
+    "guzzlehttp/guzzle": "^7.0",
+    "ext-json": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^8.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Itrn0\\Iqtek\\Dialer\\Api\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+        "Itrn0\\Iqtek\\Dialer\\Api\\Tests\\": "tests/"
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "license": "MIT",
+  "type": "library",
+  "keywords": [
+    "iqtek",
+    "dialer",
+    "api",
+    "client"
+  ]
+}
