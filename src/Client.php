@@ -45,7 +45,7 @@ class Client
      */
     public function login(string $username, string $password): void
     {
-        $data = $this->requestJson('POST', '/acl/users/api_key_login', [
+        $data = $this->requestJson('POST', 'acl/users/api_key_login', [
             'login' => $username,
             'password' => $password,
         ]);
@@ -58,7 +58,9 @@ class Client
      */
     private function requestJson($method, $path, $data = [])
     {
-        return $this->request($method, $path, $data);
+        return $this->request($method, $path, [
+            'json' => $data,
+        ]);
     }
 
     /**
@@ -70,6 +72,9 @@ class Client
             $response = $this->client->request($method, $path, $options);
             return $this->getData($response);
         } catch (Throwable $e) {
+            if (strpos($e->getMessage(), 'Entity not found') !== false) {
+                throw new EntityNotFoundException('Entity not found', 404, $e);
+            }
             throw new ClientException($e->getMessage(), $e->getCode(), $e);
         }
     }
@@ -101,9 +106,9 @@ class Client
      * @return Lead
      * @throws ClientException
      */
-    public function getLead($id = null): Lead
+    public function getLead($id): Lead
     {
-        $data = $this->requestJson('GET', '/leads/get', $this->idToParams($id));
+        $data = $this->requestJson('POST', 'leads/get', $this->idToParams($id));
         return Lead::fromArray($data);
     }
 
@@ -115,7 +120,7 @@ class Client
      */
     public function addLeads(array $leads, $bucketId): void
     {
-        $this->requestJson('POST', '/leads/bulk', [
+        $this->requestJson('POST', 'leads/bulk', [
             'bucket' => $this->idToParams($bucketId),
             'items' => array_map(static fn(Lead $lead) => $lead->toArray(), $leads),
         ]);
@@ -128,7 +133,7 @@ class Client
      */
     public function getBucket($id = null): Bucket
     {
-        $data = $this->requestJson('GET', '/buckets/get', $this->idToParams($id));
+        $data = $this->requestJson('GET', 'buckets/get', $this->idToParams($id));
         return Bucket::fromArray($data);
     }
 
@@ -140,7 +145,7 @@ class Client
      */
     public function addBucket(Bucket $bucket): void
     {
-        $this->requestJson('POST', '/buckets', [
+        $this->requestJson('POST', 'buckets', [
             'item' => $bucket->toArray(),
         ]);
     }
