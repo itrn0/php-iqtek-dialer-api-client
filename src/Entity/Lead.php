@@ -7,25 +7,23 @@ use DateTimeInterface;
 
 class Lead
 {
-    private string $id;
+    private ?string $id = null;
     private ?string $externalId = null;
     private string $name;
     private bool $active = false;
     private array $data = [];
     private string $status = '';
-    private string $campaignId;
+    private ?string $campaignId = null;
     private string $bucketId;
     private int $attempts = 0;
     private DateTimeInterface $createdAt;
     private DateTimeInterface $updatedAt;
     private ?string $nextTimeCall = null;
-    private int $priority;
+    private int $priority = 0;
     private array $phones;
 
-    public function __construct(string $id, string $campaignId, string $bucketId, string $name, array $phones = [])
+    public function __construct(string $name, string $bucketId, array $phones = [])
     {
-        $this->id = $id;
-        $this->campaignId = $campaignId;
         $this->bucketId = $bucketId;
         $this->name = $name;
         $this->phones = $phones;
@@ -33,7 +31,9 @@ class Lead
 
     public static function fromArray(array $data): Lead
     {
-        $lead = new self($data['id'], $data['campaign_id'], $data['bucket_id'], $data['name']);
+        $lead = new self($data['name'], $data['bucket_id']);
+        $lead->setId($data['id'] ?? null);
+        $lead->setCampaignId($data['campaign_id'] ?? null);
         $lead->setActive((bool)$data['active']);
         $lead->setData($data['data']);
         $lead->setStatus($data['status']);
@@ -299,25 +299,5 @@ class Lead
     {
         $this->priority = $priority;
         return $this;
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'id' => $this->getId(),
-            'external_id' => $this->getExternalId(),
-            'name' => $this->getName(),
-            'active' => $this->isActive(),
-            'data' => $this->getData(),
-            'status' => $this->getStatus(),
-            'campaign_id' => $this->getCampaignId(),
-            'bucket_id' => $this->getBucketId(),
-            'attempts' => $this->getAttempts(),
-            'created_at' => $this->getCreatedAt()->format('c'),
-            'updated_at' => $this->getUpdatedAt()->format('c'),
-            'next_time_call' => $this->getNextTimeCall(),
-            'priority' => $this->getPriority(),
-            'phones' => array_map(static fn(Phone $phone) => $phone->toArray(), $this->getPhones()),
-        ];
     }
 }
