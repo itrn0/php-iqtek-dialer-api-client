@@ -6,6 +6,7 @@ use GuzzleHttp\Client as HttpClient;
 use InvalidArgumentException;
 use Itrn0\Iqtek\Dialer\Api\Entity\Bucket;
 use Itrn0\Iqtek\Dialer\Api\Entity\Lead;
+use Itrn0\Iqtek\Dialer\Api\Entity\Phone;
 use Itrn0\Iqtek\Dialer\Api\Filter\ExternalIdFilter;
 use Itrn0\Iqtek\Dialer\Api\Filter\IdFilter;
 use JsonException;
@@ -122,7 +123,15 @@ class Client
     {
         $this->requestJson('POST', 'leads/bulk', [
             'bucket' => $this->idToParams($bucketId),
-            'items' => array_map(static fn(Lead $lead) => $lead->toArray(), $leads),
+            'items' => array_map(static fn(Lead $lead) => [
+                'external_id' => $lead->getExternalId(),
+                'name' => $lead->getName(),
+                'phones' => array_map(static fn(Phone $phone) => $phone->toArray(), $lead->getPhones()),
+                'priority' => $lead->getPriority(),
+                'active' => $lead->isActive(),
+                'data' => $lead->getData(),
+                'next_time_call' => $lead->getNextTimeCall(),
+            ], $leads),
         ]);
     }
 

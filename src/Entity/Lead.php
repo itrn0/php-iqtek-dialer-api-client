@@ -10,23 +10,25 @@ class Lead
     private string $id;
     private ?string $externalId = null;
     private string $name;
-    private bool $active;
-    private array $data;
-    private string $status;
+    private bool $active = false;
+    private array $data = [];
+    private string $status = '';
     private string $campaignId;
     private string $bucketId;
-    private int $attempts;
+    private int $attempts = 0;
     private DateTimeInterface $createdAt;
     private DateTimeInterface $updatedAt;
     private ?string $nextTimeCall = null;
     private int $priority;
+    private array $phones;
 
-    public function __construct(string $id, string $campaignId, string $bucketId, string $name)
+    public function __construct(string $id, string $campaignId, string $bucketId, string $name, array $phones = [])
     {
         $this->id = $id;
         $this->campaignId = $campaignId;
         $this->bucketId = $bucketId;
         $this->name = $name;
+        $this->phones = $phones;
     }
 
     public static function fromArray(array $data): Lead
@@ -41,7 +43,28 @@ class Lead
         $lead->setUpdatedAt(new DateTimeImmutable($data['updated_at']));
         $lead->setNextTimeCall($data['next_time_call'] ?? null);
         $lead->setPriority($data['priority']);
+        if (isset($data['phones'])) {
+            $lead->setPhones(array_map(static fn(array $phone) => Phone::fromArray($phone), $data['phones']));
+        }
         return $lead;
+    }
+
+    /**
+     * @return Phone[]
+     */
+    public function getPhones(): array
+    {
+        return $this->phones;
+    }
+
+    /**
+     * @param Phone[] $phones
+     * @return Lead
+     */
+    public function setPhones(array $phones): Lead
+    {
+        $this->phones = $phones;
+        return $this;
     }
 
     /**
@@ -294,8 +317,7 @@ class Lead
             'updated_at' => $this->getUpdatedAt()->format('c'),
             'next_time_call' => $this->getNextTimeCall(),
             'priority' => $this->getPriority(),
+            'phones' => array_map(static fn(Phone $phone) => $phone->toArray(), $this->getPhones()),
         ];
     }
-
-
 }
