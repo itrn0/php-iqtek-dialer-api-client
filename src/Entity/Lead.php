@@ -8,7 +8,7 @@ use DateTimeInterface;
 class Lead
 {
     private string $id;
-    private string $externalId;
+    private ?string $externalId = null;
     private string $name;
     private bool $active;
     private array $data;
@@ -35,7 +35,7 @@ class Lead
         $lead->setActive((bool)$data['active']);
         $lead->setData($data['data']);
         $lead->setStatus($data['status']);
-        $lead->setExternalId($data['external_id']);
+        $lead->setExternalId($data['external_id'] ?? null);
         $lead->setAttempts((int)$data['attempts']);
         $lead->setCreatedAt(new DateTimeImmutable($data['created_at']));
         $lead->setUpdatedAt(new DateTimeImmutable($data['updated_at']));
@@ -63,18 +63,18 @@ class Lead
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getExternalId(): string
+    public function getExternalId(): ?string
     {
         return $this->externalId;
     }
 
     /**
-     * @param string $externalId
+     * @param string|null $externalId
      * @return Lead
      */
-    public function setExternalId(string $externalId): Lead
+    public function setExternalId(?string $externalId): Lead
     {
         $this->externalId = $externalId;
         return $this;

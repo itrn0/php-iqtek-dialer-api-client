@@ -5,7 +5,7 @@ namespace Itrn0\Iqtek\Dialer\Api\Entity;
 class Bucket
 {
     private string $id;
-    private string $externalId;
+    private ?string $externalId = null;
     private string $campaignId;
     private bool $active = false;
     private int $priority = 0;
@@ -23,7 +23,7 @@ class Bucket
     public static function fromArray(array $data): Bucket
     {
         $bucket = new self($data['id'], $data['campaign_id'], $data['name']);
-        $bucket->setExternalId($data['external_id']);
+        $bucket->setExternalId($data['external_id'] ?? null);
         $bucket->setActive((bool)$data['active']);
         $bucket->setPriority($data['priority']);
         $bucket->setDescription($data['description']);
@@ -64,18 +64,18 @@ class Bucket
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getExternalId(): string
+    public function getExternalId(): ?string
     {
         return $this->externalId;
     }
 
     /**
-     * @param string $externalId
+     * @param string|null $externalId
      * @return Bucket
      */
-    public function setExternalId(string $externalId): Bucket
+    public function setExternalId(?string $externalId): Bucket
     {
         $this->externalId = $externalId;
         return $this;
