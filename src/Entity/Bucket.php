@@ -4,25 +4,25 @@ namespace Itrn0\Iqtek\Dialer\Api\Entity;
 
 class Bucket
 {
-    private string $id;
+    private ?string $id = null;
     private ?string $externalId = null;
     private string $campaignId;
-    private bool $active = false;
+    private bool $active;
     private int $priority = 0;
     private string $name;
     private string $description = '';
     private array $settings = [];
 
-    public function __construct(string $id, string $campaignId, string $name)
+    public function __construct(string $name, string $campaignId, bool $active = false)
     {
-        $this->id = $id;
         $this->campaignId = $campaignId;
         $this->name = $name;
+        $this->active = $active;
     }
 
     public static function fromArray(array $data): Bucket
     {
-        $bucket = new self($data['id'], $data['campaign_id'], $data['name']);
+        $bucket = new self($data['name'], $data['campaign_id']);
         $bucket->setExternalId($data['external_id'] ?? null);
         $bucket->setActive((bool)$data['active']);
         $bucket->setPriority($data['priority']);
@@ -31,33 +31,19 @@ class Bucket
         return $bucket;
     }
 
-    public function toArray(): array
-    {
-        return [
-            'id' => $this->getId(),
-            'external_id' => $this->getExternalId(),
-            'campaign_id' => $this->getCampaignId(),
-            'active' => $this->isActive(),
-            'priority' => $this->getPriority(),
-            'name' => $this->getName(),
-            'description' => $this->getDescription(),
-            'settings' => $this->getSettings(),
-        ];
-    }
-
     /**
-     * @return string
+     * @return string|null
      */
-    public function getId(): string
+    public function getId(): ?string
     {
         return $this->id;
     }
 
     /**
-     * @param string $id
+     * @param string|null $id
      * @return Bucket
      */
-    public function setId(string $id): Bucket
+    public function setId(?string $id): Bucket
     {
         $this->id = $id;
         return $this;

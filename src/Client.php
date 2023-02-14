@@ -123,15 +123,25 @@ class Client
     {
         $this->requestJson('POST', 'leads/bulk', [
             'bucket' => $this->idToParams($bucketId),
-            'items' => array_map(static fn(Lead $lead) => [
-                'external_id' => $lead->getExternalId(),
-                'name' => $lead->getName(),
-                'phones' => array_map(static fn(Phone $phone) => $phone->toArray(), $lead->getPhones()),
-                'priority' => $lead->getPriority(),
-                'active' => $lead->isActive(),
-                'data' => $lead->getData(),
-                'next_time_call' => $lead->getNextTimeCall(),
-            ], $leads),
+            'items' => array_map(static function (Lead $lead) {
+                $params = [];
+                if ($lead->getData()) {
+                    $params['data'] = $lead->getData();
+                }
+                if ($lead->getNextTimeCall()) {
+                    $params['next_time_call'] = $lead->getNextTimeCall();
+                }
+                if ($lead->getPhones()) {
+                    $params['phones'] = array_map(static fn(Phone $phone) => $phone->toArray(), $lead->getPhones());
+                }
+                return array_merge([
+                    'external_id' => $lead->getExternalId(),
+                    'name' => $lead->getName(),
+                    'priority' => $lead->getPriority(),
+                    'active' => $lead->isActive(),
+                    'timezone' => $lead->getTimezone(),
+                ], $params);
+            }, $leads),
         ]);
     }
 
@@ -154,9 +164,21 @@ class Client
      */
     public function addBucket(Bucket $bucket): void
     {
-        $this->requestJson('POST', 'buckets', [
-            'item' => $bucket->toArray(),
+        $params = [];
+        if ($bucket->getSettings()) {
+            $params['settings'] = $bucket->getSettings();
+        }
+        $data = $this->requestJson('POST', 'buckets', [
+            'item' => array_merge([
+                'external_id' => $bucket->getExternalId(),
+                'name' => $bucket->getName(),
+                'campaign_id' => $bucket->getCampaignId(),
+                'active' => $bucket->isActive(),
+                'priority' => $bucket->getPriority(),
+                'description' => $bucket->getDescription(),
+            ], $params),
         ]);
+        $bucket->setId($data['id']);
     }
 
     private function idToParams($id): array

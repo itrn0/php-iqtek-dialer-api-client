@@ -10,40 +10,43 @@ class Lead
     private ?string $id = null;
     private ?string $externalId = null;
     private string $name;
-    private bool $active = false;
+    private bool $active;
     private array $data = [];
     private string $status = '';
     private ?string $campaignId = null;
-    private string $bucketId;
+    private ?string $bucketId = null;
     private int $attempts = 0;
-    private DateTimeInterface $createdAt;
-    private DateTimeInterface $updatedAt;
+    private ?DateTimeInterface $createdAt = null;
+    private ?DateTimeInterface $updatedAt = null;
     private ?string $nextTimeCall = null;
     private int $priority = 0;
     private array $phones;
+    private int $timezone = 0;
 
-    public function __construct(string $name, string $bucketId, array $phones = [])
+    public function __construct(string $name, array $phones = [], bool $active = false)
     {
-        $this->bucketId = $bucketId;
         $this->name = $name;
         $this->phones = $phones;
+        $this->active = $active;
     }
 
     public static function fromArray(array $data): Lead
     {
-        $lead = new self($data['name'], $data['bucket_id']);
+        $lead = new self($data['name']);
         $lead->setId($data['id'] ?? null);
+        $lead->setBucketId($data['bucket_id'] ?? null);
         $lead->setCampaignId($data['campaign_id'] ?? null);
         $lead->setActive((bool)$data['active']);
-        $lead->setData($data['data']);
-        $lead->setStatus($data['status']);
+        $lead->setData($data['data'] ?? []);
+        $lead->setStatus($data['status'] ?? '');
         $lead->setExternalId($data['external_id'] ?? null);
         $lead->setAttempts((int)$data['attempts']);
-        $lead->setCreatedAt(new DateTimeImmutable($data['created_at']));
-        $lead->setUpdatedAt(new DateTimeImmutable($data['updated_at']));
+        $lead->setCreatedAt(isset($data['created_at']) ? new DateTimeImmutable($data['created_at']) : null);
+        $lead->setUpdatedAt(isset($data['updated_at']) ? new DateTimeImmutable($data['updated_at']) : null);
         $lead->setNextTimeCall($data['next_time_call'] ?? null);
-        $lead->setPriority($data['priority']);
-        if (isset($data['phones'])) {
+        $lead->setPriority($data['priority'] ?? 0);
+        $lead->setTimezone($data['timezone'] ?? 0);
+        if (isset($data['phones']) && is_array($data['phones'])) {
             $lead->setPhones(array_map(static fn(array $phone) => Phone::fromArray($phone), $data['phones']));
         }
         return $lead;
@@ -68,18 +71,18 @@ class Lead
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getId(): string
+    public function getId(): ?string
     {
         return $this->id;
     }
 
     /**
-     * @param string $id
+     * @param string|null $id
      * @return Lead
      */
-    public function setId(string $id): Lead
+    public function setId(?string $id): Lead
     {
         $this->id = $id;
         return $this;
@@ -176,36 +179,36 @@ class Lead
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getCampaignId(): string
+    public function getCampaignId(): ?string
     {
         return $this->campaignId;
     }
 
     /**
-     * @param string $campaignId
+     * @param string|null $campaignId
      * @return Lead
      */
-    public function setCampaignId(string $campaignId): Lead
+    public function setCampaignId(?string $campaignId): Lead
     {
         $this->campaignId = $campaignId;
         return $this;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getBucketId(): string
+    public function getBucketId(): ?string
     {
         return $this->bucketId;
     }
 
     /**
-     * @param string $bucketId
+     * @param string|null $bucketId
      * @return Lead
      */
-    public function setBucketId(string $bucketId): Lead
+    public function setBucketId(?string $bucketId): Lead
     {
         $this->bucketId = $bucketId;
         return $this;
@@ -230,45 +233,45 @@ class Lead
     }
 
     /**
-     * @return DateTimeInterface
+     * @return DateTimeInterface|null
      */
-    public function getCreatedAt(): DateTimeInterface
+    public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
 
     /**
-     * @param DateTimeInterface $createdAt
+     * @param DateTimeInterface|null $createdAt
      * @return Lead
      */
-    public function setCreatedAt(DateTimeInterface $createdAt): Lead
+    public function setCreatedAt(?DateTimeInterface $createdAt): Lead
     {
         $this->createdAt = $createdAt;
         return $this;
     }
 
     /**
-     * @return DateTimeInterface
+     * @return DateTimeInterface|null
      */
-    public function getUpdatedAt(): DateTimeInterface
+    public function getUpdatedAt(): ?DateTimeInterface
     {
         return $this->updatedAt;
     }
 
     /**
-     * @param DateTimeInterface $updatedAt
+     * @param DateTimeInterface|null $updatedAt
      * @return Lead
      */
-    public function setUpdatedAt(DateTimeInterface $updatedAt): Lead
+    public function setUpdatedAt(?DateTimeInterface $updatedAt): Lead
     {
         $this->updatedAt = $updatedAt;
         return $this;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getNextTimeCall(): string
+    public function getNextTimeCall(): ?string
     {
         return $this->nextTimeCall;
     }
@@ -300,4 +303,23 @@ class Lead
         $this->priority = $priority;
         return $this;
     }
+
+    /**
+     * @return int
+     */
+    public function getTimezone(): int
+    {
+        return $this->timezone;
+    }
+
+    /**
+     * @param int $timezone
+     * @return Lead
+     */
+    public function setTimezone(int $timezone): Lead
+    {
+        $this->timezone = $timezone;
+        return $this;
+    }
+
 }
